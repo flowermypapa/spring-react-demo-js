@@ -1,10 +1,16 @@
 import React from "react";
 import "./App.css";
-import { Avatar, Table, Spin, Icon, Modal } from "antd";
+import { Avatar, Table, Spin, Icon, Modal, Empty } from "antd";
 import { getAllStudents } from "./client";
 import Container from "./Container";
-import Footer from './Footer'
-import AddStudentForm from './forms/AddStudentForm'
+import Footer from "./Footer";
+import AddStudentForm from "./forms/AddStudentForm";
+import {
+  errorNotification,
+  warningNotification,
+  infoNotification,
+  successNotification
+} from "./Notification";
 
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
@@ -12,7 +18,7 @@ class App extends React.Component {
   state = {
     students: [],
     isFetching: false,
-    visible: false 
+    visible: false
   };
 
   componentDidMount() {
@@ -23,31 +29,59 @@ class App extends React.Component {
   fetchStudents = () => {
     getAllStudents()
       .then(res => res.json())
-      .then(students => this.setState({ students, isFetching: false }));
+      .then(students => this.setState({ students, isFetching: false }))
+      .catch(error => {
+        const message = error.message;
+        const description = error.error.message;
+        errorNotification(message, description);
+        this.setState({ isFetching: false });
+      });
   };
 
   showModal = () => {
     this.setState({
-      visible: true,
+      visible: true
     });
   };
 
   handleOk = e => {
     console.log(e);
     this.setState({
-      visible: false,
+      visible: false
     });
   };
 
   handleCancel = e => {
     console.log(e);
     this.setState({
-      visible: false,
+      visible: false
     });
   };
 
   render() {
     const { students, isFetching } = this.state;
+    const CommonElement = () => (
+      <div>
+        <Footer
+          numberOfStudents={students.length}
+          showModal={this.showModal}
+        ></Footer>
+        <Modal
+          title="Basic Modal"
+          visible={this.state.visible}
+          onOk={this.handleOk}
+          onCancel={this.handleCancel}
+          width={1000}
+        >
+          <AddStudentForm
+            onSuccess={() => {
+              this.handleCancel();
+              this.fetchStudents();
+            }}
+          ></AddStudentForm>
+        </Modal>
+      </div>
+    );
     const columns = [
       {
         title: "Avatar",
@@ -99,27 +133,22 @@ class App extends React.Component {
     if (students && students.length) {
       return (
         <Container>
-          <Table dataSource={students} columns={columns} rowKey="studentId" style={{marginBottom: '5em'}}/>
-          <Footer numberOfStudents={students.length} showModal={this.showModal}></Footer>
-          <Modal
-          title="Basic Modal"
-          visible={this.state.visible}
-          onOk={this.handleOk}
-          onCancel={this.handleCancel}
-          width={1000}
-        >
-          <p>Some contents...</p>
-          <AddStudentForm
-            onSuccess={() => {
-              this.handleCancel();
-              this.fetchStudents();
-            }}
-          ></AddStudentForm>
-        </Modal>
+          <Table
+            dataSource={students}
+            columns={columns}
+            rowKey="studentId"
+            style={{ marginBottom: "5em" }}
+          />
+          <CommonElement></CommonElement>
         </Container>
       );
     }
-    return <h1>No students!</h1>;
+    return (
+      <div>
+        <Empty description={<strong>No students found!</strong>}></Empty>;
+        <CommonElement></CommonElement>
+      </div>
+    )
   }
 }
 
