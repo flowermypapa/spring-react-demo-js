@@ -7,11 +7,11 @@ const checkStatus = response => {
     let error = new Error(response.statusText);
     error.response = response;
     response.json().then(e => {
-      error.error = e
-    })
-    return Promise.reject(error)
+      error.error = e;
+    });
+    return Promise.reject(error);
   }
-}
+};
 
 export const getAllStudents = () => fetch("/api/students").then(checkStatus);
 export const addNewStudent = data =>
@@ -21,4 +21,4 @@ export const addNewStudent = data =>
       "Content-Type": "application/json"
     },
     body: JSON.stringify(data)
-  });
+  }).then(checkStatus);

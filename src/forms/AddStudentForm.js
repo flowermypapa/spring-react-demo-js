@@ -42,10 +42,16 @@ const AddStudentForm = props => (
       }}
       onSubmit={(values, { setSubmitting }) => {
         values.gender = values.gender.toUpperCase();
-        addNewStudent(values).then(() => {
-          props.onSuccess();
-          setSubmitting(false);
-        });
+        addNewStudent(values)
+          .then(() => {
+            props.onSuccess();
+          })
+          .catch(error => {
+            props.onFailure(error);
+          })
+          .finally(() => {
+            setSubmitting(false);
+          });
       }}
     >
       {({

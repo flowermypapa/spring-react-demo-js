@@ -5,12 +5,7 @@ import { getAllStudents } from "./client";
 import Container from "./Container";
 import Footer from "./Footer";
 import AddStudentForm from "./forms/AddStudentForm";
-import {
-  errorNotification,
-  warningNotification,
-  infoNotification,
-  successNotification
-} from "./Notification";
+import { errorNotification, successNotification } from "./Notification";
 
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
@@ -29,7 +24,9 @@ class App extends React.Component {
   fetchStudents = () => {
     getAllStudents()
       .then(res => res.json())
-      .then(students => this.setState({ students, isFetching: false }))
+      .then(students => {
+        this.setState({ students, isFetching: false })
+      })
       .catch(error => {
         const message = error.message;
         const description = error.error.message;
@@ -43,16 +40,19 @@ class App extends React.Component {
       visible: true
     });
   };
+  closeModal = () => {
+    this.setState({
+      visible: false
+    });
+  };
 
   handleOk = e => {
-    console.log(e);
     this.setState({
       visible: false
     });
   };
 
   handleCancel = e => {
-    console.log(e);
     this.setState({
       visible: false
     });
@@ -75,8 +75,14 @@ class App extends React.Component {
         >
           <AddStudentForm
             onSuccess={() => {
-              this.handleCancel();
               this.fetchStudents();
+              successNotification("success", "success");
+              setTimeout(this.closeModal);
+            }}
+            onFailure={error => {
+              const message = error.message;
+              const description = error.error.message;
+              errorNotification(message, description);
             }}
           ></AddStudentForm>
         </Modal>
@@ -148,7 +154,7 @@ class App extends React.Component {
         <Empty description={<strong>No students found!</strong>}></Empty>;
         <CommonElement></CommonElement>
       </div>
-    )
+    );
   }
 }
 
