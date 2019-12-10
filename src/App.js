@@ -77,6 +77,7 @@ class App extends React.Component {
             onSuccess={() => {
               this.fetchStudents();
               successNotification("success", "success");
+              // close modal after setSubmitting, to escape memory leak
               setTimeout(this.closeModal);
             }}
             onFailure={error => {
